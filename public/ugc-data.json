@@ -1,0 +1,81 @@
+[
+  {
+    "_id": "6a45264b63b315d853ac35e1",
+    "productName": "jhonson",
+    "platform": "instagram",
+    "username": "Sudarshona Gogoi",
+    "userHandle": "ugc_sudarshona",
+    "content": "very good product",
+    "mediaUrl": "http://localhost:3000/ugc/petal_glow_1.jpg",
+    "mediaType": "image",
+    "rating": 5,
+    "likes": 5,
+    "buyUrl": "google.com",
+    "tags": [
+      "lipoil"
+    ],
+    "approved": true,
+    "createdAt": "2026-07-01T14:38:03.127Z"
+  },
+  {
+    "_id": "6a4524d506c670aab2c43622",
+    "productName": "Petal Glow Lip Oil",
+    "platform": "instagram",
+    "username": "Sophia Rose",
+    "userHandle": "@sophia.beauty",
+    "content": "Literally the prettiest pink shade ever! 🌸 It smells like vanilla and isn't sticky at all. My lips look so juicy and plump! 💕 #lipoil #makeup #aesthetic #softgirl",
+    "mediaUrl": "/ugc/petal_glow_1.jpg",
+    "mediaType": "image",
+    "rating": 5,
+    "likes": 2450,
+    "buyUrl": "https://example.com/shop/petal-glow-pink",
+    "tags": [
+      "lipoil",
+      "makeup",
+      "aesthetic",
+      "softgirl"
+    ],
+    "approved": true,
+    "createdAt": "2026-07-01T14:31:49.266Z"
+  },
+  {
+    "_id": "6a4524d506c670aab2c43623",
+    "productName": "Petal Glow Lip Oil",
+    "platform": "tiktok",
+    "username": "Chloe Glows",
+    "userHandle": "@chloe_glows",
+    "content": "OMG petal glow lip oil obsessed! ✨ The gloss is so nourishing, and look at that shimmer! Absolutely a 10/10 unboxing review. Grab it before it sells out! 💖💅 #foryou #makeup #fyp #petalglown",
+    "mediaUrl": "/ugc/petal_glow_2.jpg",
+    "mediaType": "image",
+    "rating": 5,
+    "likes": 8400,
+    "buyUrl": "https://example.com/shop/petal-glow-shimmer",
+    "tags": [
+      "foryou",
+      "makeup",
+      "fyp",
+      "petalglow"
+    ],
+    "approved": true,
+    "createdAt": "2026-07-01T14:31:49.266Z"
+  },
+  {
+    "_id": "6a4524d506c670aab2c43624",
+    "productName": "Petal Glow Lip Oil",
+    "platform": "twitter",
+    "username": "Bella C.",
+    "userHandle": "@bellalikesmakeup",
+    "content": "Reordered my third bottle of the Petal Glow Lip Oil in 'Rosy Dew'. Truly the only formula that keeps my lips hydrated in the winter. Highly recommend! 🎀💌 #beautyfaves",
+    "mediaUrl": "",
+    "mediaType": "text",
+    "rating": 5,
+    "likes": 420,
+    "buyUrl": "https://example.com/shop/petal-glow-rosy",
+    "tags": [
+      "beautyfaves",
+      "lipoil"
+    ],
+    "approved": true,
+    "createdAt": "2026-07-01T14:31:49.266Z"
+  }
+]
