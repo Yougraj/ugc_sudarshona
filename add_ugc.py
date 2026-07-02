@@ -28,24 +28,24 @@ def get_key():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
+        tty.setraw(fd)
+        ch_bytes = os.read(fd, 1)
+        if not ch_bytes:
+            return ""
+        ch = ch_bytes.decode('utf-8', errors='ignore')
+        
         if ch == '\x03':  # Ctrl+C
             raise KeyboardInterrupt
         if ch == '\x1b':  # Escape sequence
-            # Arrow keys are \x1b[A, \x1b[B, etc. Check with select if more keys are pending
-            r, _, _ = select.select([sys.stdin], [], [], 0.05)
+            # Non-blocking check for arrow key bytes remaining on raw file descriptor
+            r, _, _ = select.select([fd], [], [], 0.05)
             if r:
-                ch2 = sys.stdin.read(1)
-                if ch2 == '[':
-                    r, _, _ = select.select([sys.stdin], [], [], 0.05)
-                    if r:
-                        ch3 = sys.stdin.read(1)
-                        if ch3 == 'A': return 'up'
-                        elif ch3 == 'B': return 'down'
-                        elif ch3 == 'C': return 'right'
-                        elif ch3 == 'D': return 'left'
-                return 'esc'
+                rest_bytes = os.read(fd, 2)
+                seq = rest_bytes.decode('utf-8', errors='ignore')
+                if seq in ['[A', 'OA']: return 'up'
+                elif seq in ['[B', 'OB']: return 'down'
+                elif seq in ['[C', 'OC']: return 'right'
+                elif seq in ['[D', 'OD']: return 'left'
             return 'esc'
         return ch
     finally:
