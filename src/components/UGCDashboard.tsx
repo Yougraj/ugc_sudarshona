@@ -358,9 +358,10 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
               key={item._id}
               className="girly-card"
               onClick={() => setSelectedItem(item)}
+              style={{ cursor: "pointer" }}
             >
-              {item.mediaUrl && (
-                <div className="girly-card-media">
+              {item.mediaUrl ? (
+                <div className="girly-card-media" style={{ borderBottom: "none", borderRadius: "22px" }}>
                   <img
                     src={item.mediaUrl}
                     alt={item.username}
@@ -370,109 +371,30 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                     {getPlatformIcon(item.platform)} {item.platform}
                   </span>
                 </div>
-              )}
-
-              <div className="girly-card-body">
-                {!item.mediaUrl && (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      className={`girly-platform-badge ${item.platform}`}
-                      style={{ position: "static" }}
-                    >
-                      {getPlatformIcon(item.platform)} {item.platform}
-                    </span>
-                  </div>
-                )}
-
-                <a
-                  href="https://www.instagram.com/ugc_sudarshona"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="girly-card-header"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              ) : (
+                <div
+                  className="girly-card-media"
+                  style={{
+                    borderBottom: "none",
+                    borderRadius: "22px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "16px",
+                    background: "var(--bg-surface)",
+                    color: "var(--accent-pink)",
+                    textAlign: "center",
+                    aspectRatio: "1/1"
+                  }}
                 >
-                  <div className="girly-avatar">{item.username.charAt(0)}</div>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span className="girly-username">{item.username}</span>
-                    <span
-                      className="girly-handle"
-                      style={{
-                        color: "var(--accent-pink)",
-                        textDecoration: "underline",
-                      }}
-                    >
-                      {item.userHandle}
-                    </span>
-                  </div>
-                </a>
-
-                <div className="girly-stars">{renderStars(item.rating)}</div>
-
-                <p className="girly-card-text">{item.content}</p>
-
-                {item.tags && item.tags.length > 0 && (
-                  <div className="girly-tags">
-                    {item.tags.map((tag) => (
-                      <span key={tag} className="girly-tag">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* Card footer (Likes completely removed) */}
-                <div className="girly-card-footer">
-                  <span
-                    style={{ fontSize: "11px", color: "var(--text-muted)" }}
-                  >
-                    {new Date(item.createdAt).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                    })}
+                  <span className={`girly-platform-badge ${item.platform}`}>
+                    {getPlatformIcon(item.platform)} {item.platform}
                   </span>
-
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    {item.postUrl && (
-                      <a
-                        href={item.postUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="girly-shop-btn"
-                        style={{
-                          background: "none",
-                          border: "1.5px solid var(--accent-pink)",
-                          color: "var(--accent-pink)",
-                          boxShadow: "none",
-                          padding: "7px 12px",
-                          fontSize: "11px",
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {item.platform === "instagram"
-                          ? "Like 📸💕"
-                          : "Watch 🎥✨"}
-                      </a>
-                    )}
-                    <a
-                      href={(item.buyUrls && item.buyUrls.length > 0) ? item.buyUrls[0].url : item.buyUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="girly-shop-btn"
-                      style={{ padding: "8px 14px", fontSize: "11px" }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Shop 🛍️
-                    </a>
-                  </div>
+                  <div style={{ fontSize: "36px", marginBottom: "8px" }}>🧸</div>
+                  <strong style={{ fontSize: "13px" }}>{item.productName}</strong>
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
