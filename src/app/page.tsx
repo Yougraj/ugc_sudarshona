@@ -4,6 +4,11 @@ import UGCDashboard from '@/components/UGCDashboard';
 // Disable Static Rendering, force fetch on each load so changes are immediately visible
 export const dynamic = 'force-dynamic';
 
+export interface BuyLink {
+  name: string;
+  url: string;
+}
+
 export interface UGCItem {
   _id: string;
   productName: string;
@@ -16,6 +21,7 @@ export interface UGCItem {
   rating?: number;
   likes?: number;
   buyUrl: string;
+  buyUrls?: BuyLink[];
   postUrl?: string;
   approved: boolean;
   createdAt: string;
@@ -44,6 +50,7 @@ async function getUGCItems(): Promise<UGCItem[]> {
         rating: typeof item.rating === 'number' ? item.rating : 5,
         likes: typeof item.likes === 'number' ? item.likes : 0,
         buyUrl: item.buyUrl || '',
+        buyUrls: Array.isArray(item.buyUrls) ? item.buyUrls : [],
         postUrl: item.postUrl || '',
         approved: !!item.approved,
         createdAt: item.createdAt instanceof Date 

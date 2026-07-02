@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 require('dotenv').config({ path: '.env.local' });
 const { MongoClient, ObjectId } = require('mongodb');
 
@@ -64,9 +65,30 @@ async function main() {
         if (ObjectId.isValid(targetId)) {
           query = { _id: { $in: [targetId, new ObjectId(targetId)] } };
         }
-      } catch (e) {}
+      } catch {}
       const result = await collection.deleteOne(query);
       console.log(`db-deleted:${result.deletedCount}`);
+    } else if (action === 'update') {
+      let targetId = args[1];
+      const dataStr = args[2];
+      if (!targetId) throw new Error("No ID provided");
+      if (!dataStr) throw new Error("No data provided");
+      if (targetId.startsWith('"') && targetId.endsWith('"')) {
+        targetId = targetId.slice(1, -1);
+      }
+      let query = { _id: targetId };
+      try {
+        if (ObjectId.isValid(targetId)) {
+          query = { _id: { $in: [targetId, new ObjectId(targetId)] } };
+        }
+      } catch {}
+      const updatedFields = JSON.parse(dataStr);
+      delete updatedFields._id;
+      if (updatedFields.createdAt && typeof updatedFields.createdAt === 'string') {
+        updatedFields.createdAt = new Date(updatedFields.createdAt);
+      }
+      const result = await collection.updateOne(query, { $set: updatedFields });
+      console.log(`db-updated:${result.modifiedCount}`);
     } else {
       console.error(`Unknown action: ${action}`);
       process.exit(1);

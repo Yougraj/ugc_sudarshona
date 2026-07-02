@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { UGCItem } from "@/app/page";
 
 interface UGCDashboardProps {
@@ -24,13 +24,8 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
   const [selectedItem, setSelectedItem] = useState<UGCItem | null>(null);
 
   // Cute Greeting States
-  const [stickerNum, setStickerNum] = useState(1);
-  const [greetingText, setGreetingText] = useState("");
-
-  // Select a random sticker and greeting on mount
-  useEffect(() => {
-    rollGreeting();
-  }, []);
+  const [stickerNum, setStickerNum] = useState(() => Math.floor(Math.random() * 7) + 1);
+  const [greetingText, setGreetingText] = useState(() => CUTE_GREETINGS[Math.floor(Math.random() * CUTE_GREETINGS.length)]);
 
   const rollGreeting = () => {
     const randomSticker = Math.floor(Math.random() * 7) + 1; // 1 to 7
@@ -466,7 +461,7 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                       </a>
                     )}
                     <a
-                      href={item.buyUrl}
+                      href={(item.buyUrls && item.buyUrls.length > 0) ? item.buyUrls[0].url : item.buyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="girly-shop-btn"
@@ -631,7 +626,7 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                   )}
                 </span>
 
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                   {selectedItem.postUrl && (
                     <a
                       href={selectedItem.postUrl}
@@ -652,15 +647,32 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                         : "Watch Video 🎥✨"}
                     </a>
                   )}
-                  <a
-                    href={selectedItem.buyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="girly-shop-btn"
-                    style={{ padding: "9px 18px", fontSize: "12px" }}
-                  >
-                    Buy Product 🛒
-                  </a>
+                  {selectedItem.buyUrls && selectedItem.buyUrls.length > 0 ? (
+                    selectedItem.buyUrls.map((link, idx) => (
+                      <a
+                        key={idx}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="girly-shop-btn"
+                        style={{ padding: "9px 18px", fontSize: "12px" }}
+                      >
+                        Buy on {link.name} 🛒
+                      </a>
+                    ))
+                  ) : (
+                    selectedItem.buyUrl && (
+                      <a
+                        href={selectedItem.buyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="girly-shop-btn"
+                        style={{ padding: "9px 18px", fontSize: "12px" }}
+                      >
+                        Buy Product 🛒
+                      </a>
+                    )
+                  )}
                 </div>
               </div>
             </div>
