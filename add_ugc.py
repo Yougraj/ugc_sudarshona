@@ -3,9 +3,6 @@ import json
 import subprocess
 import sys
 
-# Output JSON path
-OUTPUT_JSON_PATH = os.path.join("public", "ugc-data.json")
-
 # Colors for terminal
 PINK = "\033[95m"
 CYAN = "\033[96m"
@@ -49,40 +46,22 @@ def run_db_helper(action, data=None):
 def main():
     print_banner()
     
-    print(f"{YELLOW}Connecting to our UGC database...{END}")
+    print(f"{YELLOW}Connecting to MongoDB Atlas...{END}")
     count_res = run_db_helper("count")
     if count_res is None:
-        print(f"{RED}Oh no! 🌸 We couldn't open the diary. Check if Node is installed cutely!{END}")
+        print(f"{RED}Oh no! 🌸 We couldn't connect to MongoDB Atlas. Check your database settings and internet!{END}")
         sys.exit(1)
     
-    is_fallback = count_res.startswith("local-fallback:")
-    if is_fallback:
-        db_count = int(count_res.split(":")[1])
-        print(f"{PINK}✨ MongoDB Atlas is taking a cozy nap! We are using our local magical file to save your beauty feed! 🎀{END}\n")
-    else:
-        db_count = int(count_res.split(":")[1])
-        print(f"{GREEN}✔ Successfully connected to MongoDB Atlas! 🌟{END}\n")
-
-    # Option to seed default data if DB/JSON is empty
-    if db_count == 0:
-        seed = input(f"{YELLOW}Our catalog is empty! Would you like to seed default girly UGC items? (y/n): {END}").strip().lower()
-        if seed == 'y':
-            print(f"{YELLOW}Seeding default items...{END}")
-            seed_res = run_db_helper("seed")
-            if seed_res and ("seeded:" in seed_res):
-                print(f"{GREEN}✔ Successfully seeded initial items!{END}")
-                run_db_helper("sync")
-            else:
-                print(f"{RED}Seeding failed.{END}")
+    db_count = int(count_res.split(":")[1])
+    print(f"{GREEN}✔ Successfully connected to MongoDB Atlas! ({db_count} items found) 🌟{END}\n")
 
     while True:
         print(f"{PINK}{BOLD}--- Actions ---{END}")
         print("1. Add a New UGC Item")
-        print("2. Sync Database to Website JSON")
-        print("3. Remove/Delete a UGC Item")
-        print("4. Exit")
+        print("2. Remove/Delete a UGC Item")
+        print("3. Exit")
         
-        choice = input(f"\n{CYAN}Select an option (1-4): {END}").strip()
+        choice = input(f"\n{CYAN}Select an option (1-3): {END}").strip()
         
         if choice == '1':
             print(f"\n{PINK}{BOLD}--- Enter UGC Details ---{END}\n")
@@ -145,35 +124,25 @@ def main():
             insert_res = run_db_helper("insert", new_item)
             if insert_res and ("inserted:" in insert_res):
                 inserted_id = insert_res.split(":")[1]
-                print(f"{GREEN}✔ Successfully saved cutely! ID: {inserted_id}{END}\n")
-                # Auto-sync
-                run_db_helper("sync")
+                print(f"{GREEN}✔ Successfully saved! ID: {inserted_id}{END}\n")
             else:
                 print(f"{RED}Failed to insert item.{END}")
             
         elif choice == '2':
-            print(f"{YELLOW}Syncing database to website...{END}")
-            sync_res = run_db_helper("sync")
-            if sync_res and ("synced:" in sync_res):
-                count_synced = sync_res.split(":")[1]
-                print(f"{GREEN}✔ Successfully synced {count_synced} items to website!{END}\n")
-            else:
-                print(f"{RED}Sync failed.{END}")
-                
-        elif choice == '3':
-            if not os.path.exists(OUTPUT_JSON_PATH):
-                print(f"{RED}No items available. Run sync first!{END}\n")
+            print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
+            list_res = run_db_helper("list")
+            if not list_res:
+                print(f"{RED}Failed to fetch items from database.{END}\n")
                 continue
                 
-            with open(OUTPUT_JSON_PATH, "r", encoding="utf-8") as f:
-                try:
-                    items = json.load(f)
-                except Exception as e:
-                    print(f"{RED}Failed to read JSON: {e}{END}\n")
-                    continue
-                    
+            try:
+                items = json.loads(list_res)
+            except Exception as e:
+                print(f"{RED}Failed to parse items JSON: {e}{END}\n")
+                continue
+                
             if not items:
-                print(f"{YELLOW}No items available to delete cutely! 🌸{END}\n")
+                print(f"{YELLOW}No items available to delete! 🌸{END}\n")
                 continue
                 
             print(f"\n{PINK}{BOLD}--- Select UGC Item to Delete ---{END}\n")
@@ -199,20 +168,18 @@ def main():
                         print(f"{YELLOW}Deleting item...{END}")
                         del_res = run_db_helper("delete", target_id)
                         if del_res and ("deleted" in del_res):
-                            print(f"{GREEN}✔ Successfully deleted item! 🌸{END}\n")
-                            # Auto-sync
-                            run_db_helper("sync")
+                            print(f"{GREEN}✔ Successfully deleted item from MongoDB Atlas! 🌸{END}\n")
                         else:
                             print(f"{RED}Failed to delete item.{END}\n")
                     else:
-                        print(f"{PINK}Deletion cancelled cutely! 💕{END}\n")
+                        print(f"{PINK}Deletion cancelled! 💕{END}\n")
                 else:
                     print(f"{RED}Invalid item number!{END}\n")
             except ValueError:
                 print(f"{RED}Please enter a valid number.{END}\n")
                 
-        elif choice == '4':
-            print(f"{PINK}Goodbye cutie! Keep shining! ✨{END}")
+        elif choice == '3':
+            print(f"{PINK}Goodbye! Keep shining! ✨{END}")
             break
         else:
             print(f"{RED}Invalid option. Please try again.{END}\n")
