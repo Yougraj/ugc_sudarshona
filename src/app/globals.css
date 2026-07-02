@@ -2,6 +2,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap');
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
   --bg-main: #fff0f3; /* Super soft pastel pink */
   --bg-phone: #ffffff; /* Clean white for phone body */
@@ -62,10 +66,10 @@ body {
   background-attachment: fixed;
 }
 
-/* Mobile-Locked Screen Container */
+/* Mobile-Locked Screen Container - Responsive Canvas */
 .phone-frame {
   width: 100%;
-  max-width: 480px; /* Forces mobile layout on desktop */
+  max-width: 480px; /* Default for mobile screens */
   min-height: 100vh;
   background-color: var(--bg-phone);
   display: flex;
@@ -73,8 +77,27 @@ body {
   box-shadow: 0 0 60px rgba(255, 117, 143, 0.15);
   position: relative;
   overflow-y: auto;
+  scroll-behavior: smooth;
   border-left: 1px solid rgba(255, 182, 193, 0.2);
   border-right: 1px solid rgba(255, 182, 193, 0.2);
+  transition: max-width 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .phone-frame {
+    max-width: 720px;
+    margin: 30px auto;
+    border-radius: 30px;
+    min-height: calc(100vh - 60px);
+    box-shadow: 0 15px 50px rgba(255, 117, 143, 0.15);
+    border: 1.5px solid var(--border-color);
+  }
+}
+
+@media (min-width: 1024px) {
+  .phone-frame {
+    max-width: 1100px;
+  }
 }
 
 a {
@@ -278,12 +301,28 @@ button, input, select {
   width: 100%;
 }
 
-/* UGC Feed Grid */
+/* UGC Feed Grid - Responsive */
 .girly-feed {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  padding: 0 16px 40px;
+  gap: 12px;
+  padding: 0 12px 40px;
+}
+
+@media (min-width: 600px) {
+  .girly-feed {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 0 16px 40px;
+  }
+}
+
+@media (min-width: 900px) {
+  .girly-feed {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 0 24px 40px;
+  }
 }
 
 .girly-card {
@@ -342,10 +381,11 @@ button, input, select {
 .girly-platform-badge.web { background: #ffd1dc; color: #ff5d8f; border: 1.5px solid #ff5d8f; }
 
 .girly-card-body {
-  padding: 16px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  flex-grow: 1;
 }
 
 .girly-card-header {
@@ -392,9 +432,13 @@ button, input, select {
 }
 
 .girly-card-text {
-  font-size: 13.5px;
+  font-size: 12.5px;
   color: var(--text-secondary);
-  line-height: 1.5;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .girly-tags {
@@ -415,11 +459,12 @@ button, input, select {
 
 .girly-card-footer {
   display: flex;
+  gap: 8px;
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid #ffe5ec;
-  padding-top: 12px;
-  margin-top: 4px;
+  padding-top: 10px;
+  margin-top: auto;
 }
 
 .girly-likes {
@@ -433,19 +478,23 @@ button, input, select {
 
 /* Shop / Buy Button */
 .girly-shop-btn {
-  background: linear-gradient(135deg, #ff758f 0%, #ff8fa3 50%, #ffb3c6 100%);
+  background: linear-gradient(135deg, #ff758f 0%, #ff8fa3 100%);
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 99px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 10px rgba(255, 117, 143, 0.25);
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(255, 117, 143, 0.2);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .girly-shop-btn:hover {
@@ -581,4 +630,28 @@ button, input, select {
   text-align: center;
   padding: 40px 20px;
   color: var(--text-secondary);
+}
+
+/* Responsive Desktop Modal Layout */
+@media (min-width: 768px) {
+  .girly-modal-content {
+    max-width: 850px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    max-height: 85vh;
+    overflow: hidden;
+  }
+  
+  .girly-modal-media {
+    border-right: 2px solid #ffe5ec;
+    border-bottom: none !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+  }
+  
+  .girly-modal-details {
+    padding: 24px;
+    height: 100%;
+    overflow-y: auto;
+  }
 }
