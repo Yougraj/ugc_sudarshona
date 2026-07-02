@@ -1,7 +1,19 @@
 import os
 import json
-import subprocess
 import sys
+import datetime
+
+# Check and import MongoDB dependencies
+try:
+    from pymongo import MongoClient
+    from bson.objectid import ObjectId
+except ImportError:
+    print("\033[91mError: MongoDB Python dependencies are not installed!\033[0m")
+    print("Please install them using:")
+    print("  venv/bin/pip install pymongo dnspython")
+    print("Or run the CLI with npm (which uses the virtual environment):")
+    print("  npm run cli")
+    sys.exit(1)
 
 # Try imports for raw keyboard selection
 try:
@@ -20,6 +32,123 @@ YELLOW = "\033[93m"
 RED = "\033[91m"
 BOLD = "\033[1m"
 END = "\033[0m"
+
+# Load local environment variables manually
+def load_env_local():
+    env_vars = {}
+    if os.path.exists(".env.local"):
+        with open(".env.local", "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip()
+                        if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                            v = v[1:-1]
+                        env_vars[k] = v
+    return env_vars
+
+# MongoDB configuration
+ENV = load_env_local()
+MONGODB_URI = ENV.get("MONGODB_URI") or os.environ.get("MONGODB_URI")
+DB_NAME = "ugc_marketing"
+COLLECTION_NAME = "ugc_items"
+
+_mongo_client = None
+
+def get_db_collection():
+    global _mongo_client
+    if not MONGODB_URI:
+        print(f"{RED}Error: MONGODB_URI is not defined in .env.local or environment variables.{END}")
+        sys.exit(1)
+        
+    if _mongo_client is None:
+        try:
+            _mongo_client = MongoClient(MONGODB_URI)
+        except Exception as e:
+            print(f"{RED}Failed to create MongoDB client: {e}{END}")
+            sys.exit(1)
+            
+    return _mongo_client[DB_NAME][COLLECTION_NAME]
+
+# Direct MongoDB Native Helpers
+def db_count():
+    try:
+        col = get_db_collection()
+        return col.count_documents({})
+    except Exception as e:
+        print(f"{RED}Oh no! 🌸 We couldn't connect to MongoDB Atlas. Error: {e}{END}")
+        return None
+
+def db_list():
+    try:
+        col = get_db_collection()
+        docs = list(col.find({}).sort("createdAt", -1))
+        items = []
+        for doc in docs:
+            item = dict(doc)
+            item["_id"] = str(item["_id"])
+            if "createdAt" in item and isinstance(item["createdAt"], datetime.datetime):
+                item["createdAt"] = item["createdAt"].isoformat()
+            items.append(item)
+        return items
+    except Exception as e:
+        print(f"{RED}Failed to fetch items from database: {e}{END}")
+        return None
+
+def db_insert(new_item):
+    try:
+        col = get_db_collection()
+        item_to_insert = dict(new_item)
+        item_to_insert["createdAt"] = datetime.datetime.now(datetime.timezone.utc)
+        item_to_insert["approved"] = True
+        
+        result = col.insert_one(item_to_insert)
+        return str(result.inserted_id)
+    except Exception as e:
+        print(f"{RED}Failed to insert item: {e}{END}")
+        return None
+
+def db_delete(target_id):
+    try:
+        col = get_db_collection()
+        query = {"_id": target_id}
+        if ObjectId.is_valid(target_id):
+            query = {"_id": {"$in": [target_id, ObjectId(target_id)]}}
+            
+        result = col.delete_one(query)
+        return result.deleted_count
+    except Exception as e:
+        print(f"{RED}Failed to delete item: {e}{END}")
+        return None
+
+def db_update(target_id, updated_fields):
+    try:
+        col = get_db_collection()
+        query = {"_id": target_id}
+        if ObjectId.is_valid(target_id):
+            query = {"_id": {"$in": [target_id, ObjectId(target_id)]}}
+            
+        fields_to_update = dict(updated_fields)
+        if "_id" in fields_to_update:
+            del fields_to_update["_id"]
+            
+        if "createdAt" in fields_to_update and isinstance(fields_to_update["createdAt"], str):
+            try:
+                iso_str = fields_to_update["createdAt"]
+                if iso_str.endswith("Z"):
+                    iso_str = iso_str[:-1] + "+00:00"
+                fields_to_update["createdAt"] = datetime.datetime.fromisoformat(iso_str)
+            except Exception:
+                pass
+                
+        result = col.update_one(query, {"$set": fields_to_update})
+        return result.modified_count
+    except Exception as e:
+        print(f"{RED}Failed to update item: {e}{END}")
+        return None
 
 class GoBackException(Exception):
     pass
@@ -186,43 +315,8 @@ def get_input(prompt, default=None, required=False):
             return ""
         return val
 
-def run_db_helper(action, data=None, target_id=None):
-    """Executes the db_helper.js Node script to interact with MongoDB"""
-    cmd = ["node", "db_helper.js", action]
-    if target_id is not None:
-        cmd.append(target_id)
-    if data is not None:
-        if isinstance(data, str):
-            cmd.append(data)
-        else:
-            cmd.append(json.dumps(data))
-    
-    try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        print(f"{RED}Database helper command failed: {e.stderr.strip() or e.stdout.strip()}{END}")
-        return None
-
 def fetch_items():
-    list_res = run_db_helper("list")
-    if not list_res:
-        return None
-    items = None
-    for line in list_res.splitlines():
-        line_str = line.strip()
-        if line_str.startswith("[") and line_str.endswith("]"):
-            try:
-                items = json.loads(line_str)
-                break
-            except Exception:
-                pass
-    if items is None:
-        try:
-            items = json.loads(list_res)
-        except Exception as e:
-            return None
-    return items
+    return db_list()
 
 def format_item_for_list(item):
     if item.get("_id") == "back":
@@ -384,44 +478,21 @@ def edit_ugc_item(item):
     }
     
     print(f"\n{YELLOW}Updating item in database...{END}")
-    update_res = run_db_helper("update", data=json.dumps(updated_item), target_id=item.get("_id"))
-    
-    updated_count = None
-    if update_res:
-        for line in update_res.splitlines():
-            if line.startswith("db-updated:"):
-                updated_count = line.split(":")[1].strip()
-                break
-                
-    if updated_count and int(updated_count) > 0:
+    updated_count = db_update(item.get("_id"), updated_item)
+    if updated_count is not None and updated_count > 0:
         print(f"{GREEN}✔ Successfully updated UGC item in MongoDB Atlas! 🌸{END}\n")
     else:
-        print(f"{RED}Failed to update item. Output: {update_res}{END}\n")
+        print(f"{RED}Failed to update item (or no fields were changed).{END}\n")
 
 def main():
     print_banner()
     
     print(f"{YELLOW}Connecting to MongoDB Atlas...{END}")
-    count_res = run_db_helper("count")
-    if count_res is None:
-        print(f"{RED}Oh no! 🌸 We couldn't connect to MongoDB Atlas. Check your database settings and internet!{END}")
+    db_count_val = db_count()
+    if db_count_val is None:
         sys.exit(1)
         
-    db_count = 0
-    found = False
-    for line in count_res.splitlines():
-        if line.startswith("db:"):
-            try:
-                db_count = int(line.split(":")[1])
-                found = True
-                break
-            except ValueError:
-                pass
-    if not found:
-        print(f"{RED}Failed to parse database count from output: {count_res}{END}")
-        sys.exit(1)
-        
-    print(f"{GREEN}✔ Successfully connected to MongoDB Atlas! ({db_count} items found) 🌟{END}\n")
+    print(f"{GREEN}✔ Successfully connected to MongoDB Atlas! ({db_count_val} items found) 🌟{END}\n")
     
     main_menu_options = [
         {"name": "✨ Add a New UGC Item", "action": "add"},
@@ -517,17 +588,11 @@ def main():
                     }
                     
                     print(f"\n{YELLOW}Saving item...{END}")
-                    insert_res = run_db_helper("insert", new_item)
-                    inserted_id = None
-                    if insert_res:
-                        for line in insert_res.splitlines():
-                            if line.startswith("db-inserted:"):
-                                inserted_id = line.split(":")[1].strip()
-                                break
+                    inserted_id = db_insert(new_item)
                     if inserted_id:
                         print(f"{GREEN}✔ Successfully saved! ID: {inserted_id}{END}\n")
                     else:
-                        print(f"{RED}Failed to insert item. Output: {insert_res}{END}")
+                        print(f"{RED}Failed to insert item.{END}")
                         
                 elif action == 'edit':
                     print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
@@ -566,17 +631,11 @@ def main():
                     confirm = get_input(f"Are you sure you want to delete {item_to_del.get('username')}'s review for '{item_to_del.get('productName')}'? (y/n)", default="n").strip().lower()
                     if confirm in ['y', 'yes']:
                         print(f"{YELLOW}Deleting item...{END}")
-                        del_res = run_db_helper("delete", target_id=item_to_del.get("_id"))
-                        deleted_count = None
-                        if del_res:
-                            for line in del_res.splitlines():
-                                if line.startswith("db-deleted:"):
-                                    deleted_count = line.split(":")[1].strip()
-                                    break
-                        if deleted_count and int(deleted_count) > 0:
+                        deleted_count = db_delete(item_to_del.get("_id"))
+                        if deleted_count is not None and deleted_count > 0:
                             print(f"{GREEN}✔ Successfully deleted item from MongoDB Atlas! 🌸{END}\n")
                         else:
-                            print(f"{RED}Failed to delete item. Output: {del_res}{END}\n")
+                            print(f"{RED}Failed to delete item.{END}\n")
                     else:
                         print(f"{PINK}Deletion cancelled! 💕{END}\n")
                         
