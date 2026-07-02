@@ -367,6 +367,9 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                     alt={item.username}
                     className="girly-card-img"
                   />
+                  <div className="girly-card-hover-overlay">
+                    <span className="girly-card-hover-icon">💖</span>
+                  </div>
                   <span className={`girly-platform-badge ${item.platform}`}>
                     {getPlatformIcon(item.platform)} {item.platform}
                   </span>
@@ -385,7 +388,8 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                     background: "var(--bg-surface)",
                     color: "var(--accent-pink)",
                     textAlign: "center",
-                    aspectRatio: "1/1"
+                    aspectRatio: "1/1",
+                    position: "relative"
                   }}
                 >
                   <span className={`girly-platform-badge ${item.platform}`}>
@@ -393,6 +397,9 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                   </span>
                   <div style={{ fontSize: "36px", marginBottom: "8px" }}>🧸</div>
                   <strong style={{ fontSize: "13px" }}>{item.productName}</strong>
+                  <div className="girly-card-hover-overlay">
+                    <span className="girly-card-hover-icon">💖</span>
+                  </div>
                 </div>
               )}
             </div>

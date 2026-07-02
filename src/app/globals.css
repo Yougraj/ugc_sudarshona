@@ -330,16 +330,16 @@ button, input, select {
   border: 2px solid #ffe5ec;
   border-radius: 24px;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
 .girly-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--border-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(255, 117, 143, 0.18), 0 0 15px rgba(255, 204, 213, 0.4);
+  border-color: var(--accent-pink);
 }
 
 .girly-card-media {
@@ -357,6 +357,7 @@ button, input, select {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
 .girly-platform-badge {
@@ -667,4 +668,40 @@ button, input, select {
     height: 100%;
     overflow-y: auto;
   }
+}
+
+/* Card Hover Micro-Animations */
+.girly-card-hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 117, 143, 0.35); /* Translucent cherry overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+  border-radius: 22px;
+}
+
+.girly-card-hover-icon {
+  font-size: 32px;
+  transform: scale(0.5);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.girly-card:hover .girly-card-hover-overlay {
+  opacity: 1;
+}
+
+.girly-card:hover .girly-card-hover-icon {
+  transform: scale(1.1);
+  animation: float 2s ease-in-out infinite;
+}
+
+.girly-card:hover .girly-card-img {
+  transform: scale(1.06);
 }

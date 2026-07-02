@@ -233,7 +233,13 @@ def format_item_for_list(item):
     creator = item.get("username", "sudarshona gogoi")
     content = item.get("content", "")
     content_snippet = content[:30] + "..." if len(content) > 30 else content
-    return f"[{icon} {platform.upper()}] {product} by {creator} - \"{content_snippet}\""
+    
+    # Calculate link counts
+    buy_urls = item.get("buyUrls", [])
+    total_links = len(buy_urls) + (1 if item.get("buyUrl") else 0)
+    links_info = f"({total_links} link{'s' if total_links != 1 else ''})"
+    
+    return f"[{icon} {platform.upper()}] {product} {YELLOW}{links_info}{END} by {creator} - \"{content_snippet}\""
 
 def show_detail_view(item):
     print(f"\n{PINK}{BOLD}==================================================")
