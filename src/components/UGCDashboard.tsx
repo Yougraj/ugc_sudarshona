@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { UGCItem } from "@/app/page";
 
 interface UGCDashboardProps {
@@ -23,9 +23,9 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
   const [sortBy, setSortBy] = useState("newest");
   const [selectedItem, setSelectedItem] = useState<UGCItem | null>(null);
 
-  // Cute Greeting States
-  const [stickerNum, setStickerNum] = useState(() => Math.floor(Math.random() * 7) + 1);
-  const [greetingText, setGreetingText] = useState(() => CUTE_GREETINGS[Math.floor(Math.random() * CUTE_GREETINGS.length)]);
+  // Cute Greeting States - Stable defaults for server rendering
+  const [stickerNum, setStickerNum] = useState(1);
+  const [greetingText, setGreetingText] = useState(CUTE_GREETINGS[0]);
 
   const rollGreeting = () => {
     const randomSticker = Math.floor(Math.random() * 7) + 1; // 1 to 7
@@ -34,6 +34,11 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
     setStickerNum(randomSticker);
     setGreetingText(randomMsg);
   };
+
+  // Roll randomly on the client after hydration
+  useEffect(() => {
+    rollGreeting();
+  }, []);
 
   // Computations for Stats Dashboard (Likes count is removed)
   const stats = useMemo(() => {
