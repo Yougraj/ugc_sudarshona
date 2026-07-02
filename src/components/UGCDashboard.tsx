@@ -565,8 +565,8 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                       }}
                     >
                       {selectedItem.platform === "instagram"
-                        ? "Like on Instagram 📸💕"
-                        : "Watch Video 🎥✨"}
+                        ? "Review on Instagram 📸💕"
+                        : "Review on YouTube 🎥✨"}
                     </a>
                   )}
                   {selectedItem.buyUrls && selectedItem.buyUrls.length > 0 ? (
