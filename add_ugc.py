@@ -21,9 +21,15 @@ RED = "\033[91m"
 BOLD = "\033[1m"
 END = "\033[0m"
 
+class GoBackException(Exception):
+    pass
+
 def get_key():
     if not IS_LINUX:
-        return sys.stdin.read(1)
+        ch = sys.stdin.read(1)
+        if not ch:
+            raise EOFError("stdin closed")
+        return ch
         
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -31,7 +37,7 @@ def get_key():
         tty.setraw(fd)
         ch_bytes = os.read(fd, 1)
         if not ch_bytes:
-            return ""
+            raise EOFError("stdin closed")
         ch = ch_bytes.decode('utf-8', errors='ignore')
         
         if ch == '\x03':  # Ctrl+C
@@ -118,7 +124,7 @@ def fzf_select(items, format_fn, prompt="Search: ", header=None):
             # Read key
             try:
                 key = get_key()
-            except KeyboardInterrupt:
+            except (KeyboardInterrupt, EOFError):
                 if prev_lines_count > 0:
                     for _ in range(prev_lines_count):
                         sys.stdout.write("\033[A\033[K")
@@ -166,9 +172,10 @@ def get_input(prompt, default=None, required=False):
     while True:
         try:
             val = input(f"{CYAN}{prompt}{suffix}: {END}").strip()
-        except KeyboardInterrupt:
-            print(f"\n{RED}Operation cancelled.{END}")
-            raise
+        except (KeyboardInterrupt, EOFError):
+            raise GoBackException()
+        if val.lower() in ['back', 'cancel']:
+            raise GoBackException()
         if not val:
             if default is not None:
                 return default
@@ -217,6 +224,8 @@ def fetch_items():
     return items
 
 def format_item_for_list(item):
+    if item.get("_id") == "back":
+        return f"{BOLD}{YELLOW}🔙 Go Back (Return to Main Menu){END}"
     platform = item.get("platform", "instagram")
     icon = "📸" if platform == "instagram" else "🎥"
     product = item.get("productName", "Unknown Product")
@@ -429,170 +438,166 @@ def main():
                 
             action = choice_item["action"]
             
-            if action == 'add':
-                print(f"\n{PINK}{BOLD}--- Enter UGC Details ---{END}\n")
-                productName = get_input("Product Name", default="Petal Glow Lip Oil")
-                
-                while True:
-                    platform = get_input("Platform (instagram/youtube)", default="instagram").lower()
-                    if platform in ["instagram", "youtube"]:
-                        break
-                    print(f"{RED}Invalid platform. Choose from: instagram, youtube{END}")
-                    
-                username = "sudarshona gogoi"
-                userHandle = "@ugc_sudarshona"
-                content = get_input("Review Content / Caption", required=True)
-                
-                mediaUrl = get_input("Media URL (relative path, e.g. /ugc/petal_glow_1.jpg, or empty)", default="")
-                mediaType = "text"
-                if mediaUrl:
-                    while True:
-                        mediaType = get_input("Media Type (image/video)", default="image").lower()
-                        if mediaType in ["image", "video"]:
-                            break
-                        print(f"{RED}Invalid media type. Choose 'image' or 'video'{END}")
-                        
-                while True:
-                    try:
-                        rating = int(get_input("Rating (1-5)", default="5"))
-                        if 1 <= rating <= 5:
-                            break
-                        print(f"{RED}Rating must be between 1 and 5.{END}")
-                    except ValueError:
-                        print(f"{RED}Please enter a valid number.{END}")
-                        
-                buyUrl = get_input("Direct Buy Product Link (e.g. https://example.com/buy)", required=True)
-                
-                # Multiple alternative links
-                buyUrls = []
-                add_multi = get_input("Would you like to add alternative purchase options (e.g. Amazon, Nykaa)? (y/n)", default="n").lower()
-                if add_multi in ['y', 'yes']:
-                    while True:
-                        name = get_input("Alternative Store Name (e.g. Amazon, Nykaa, Sephora) [or empty to stop]")
-                        if not name:
-                            break
-                        url = get_input(f"Alternative Product Link for {name}", required=True)
-                        buyUrls.append({"name": name, "url": url})
-                        
-                        another = get_input("Add another alternative purchase option? (y/n)", default="n").lower()
-                        if another not in ['y', 'yes']:
-                            break
-                
-                default_post_url = "https://www.instagram.com/ugc_sudarshona" if platform == "instagram" else "https://youtube.com"
-                postUrl = get_input("Instagram Post or YouTube Video Link", default=default_post_url)
-                
-                tags_input = get_input("Tags (comma-separated, e.g. makeup, lipoil)")
-                tags = [t.strip().lower() for t in tags_input.split(",") if t.strip()]
-                
-                new_item = {
-                    "productName": productName,
-                    "platform": platform,
-                    "username": username,
-                    "userHandle": userHandle,
-                    "content": content,
-                    "mediaUrl": mediaUrl,
-                    "mediaType": mediaType,
-                    "rating": rating,
-                    "buyUrl": buyUrl,
-                    "buyUrls": buyUrls,
-                    "postUrl": postUrl,
-                    "tags": tags
-                }
-                
-                print(f"\n{YELLOW}Saving item...{END}")
-                insert_res = run_db_helper("insert", new_item)
-                inserted_id = None
-                if insert_res:
-                    for line in insert_res.splitlines():
-                        if line.startswith("db-inserted:"):
-                            inserted_id = line.split(":")[1].strip()
-                            break
-                if inserted_id:
-                    print(f"{GREEN}✔ Successfully saved! ID: {inserted_id}{END}\n")
-                else:
-                    print(f"{RED}Failed to insert item. Output: {insert_res}{END}")
-                    
-            elif action == 'edit':
-                print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
-                items = fetch_items()
-                if not items:
-                    print(f"{RED}Failed to fetch items from database or no items exist.{END}\n")
-                    continue
-                    
-                item_to_edit = fzf_select(
-                    items,
-                    format_item_for_list,
-                    prompt="Select UGC Item to Edit: ",
-                    header=f"{PINK}{BOLD}--- Edit UGC Item ---{END}"
-                )
-                if not item_to_edit:
-                    print(f"{PINK}Edit cancelled!{END}\n")
-                    continue
-                    
-                edit_ugc_item(item_to_edit)
-                
-            elif action == 'delete':
-                print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
-                items = fetch_items()
-                if not items:
-                    print(f"{RED}Failed to fetch items from database or no items exist.{END}\n")
-                    continue
-                    
-                item_to_del = fzf_select(
-                    items,
-                    format_item_for_list,
-                    prompt="Select UGC Item to Delete: ",
-                    header=f"{PINK}{BOLD}--- Delete UGC Item ---{END}"
-                )
-                if not item_to_del:
-                    print(f"{PINK}Deletion cancelled!{END}\n")
-                    continue
-                    
-                confirm = get_input(f"Are you sure you want to delete {item_to_del.get('username')}'s review for '{item_to_del.get('productName')}'? (y/n)", default="n").strip().lower()
-                if confirm in ['y', 'yes']:
-                    print(f"{YELLOW}Deleting item...{END}")
-                    del_res = run_db_helper("delete", target_id=item_to_del.get("_id"))
-                    deleted_count = None
-                    if del_res:
-                        for line in del_res.splitlines():
-                            if line.startswith("db-deleted:"):
-                                deleted_count = line.split(":")[1].strip()
-                                break
-                    if deleted_count and int(deleted_count) > 0:
-                        print(f"{GREEN}✔ Successfully deleted item from MongoDB Atlas! 🌸{END}\n")
-                    else:
-                        print(f"{RED}Failed to delete item. Output: {del_res}{END}\n")
-                else:
-                    print(f"{PINK}Deletion cancelled! 💕{END}\n")
-                    
-            elif action == 'view':
-                print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
-                items = fetch_items()
-                if not items:
-                    print(f"{RED}Failed to fetch items from database or no items exist.{END}\n")
-                    continue
-                    
-                while True:
-                    item_to_view = fzf_select(
-                        items,
-                        format_item_for_list,
-                        prompt="Select UGC Item to View Details (Esc to go back): ",
-                        header=f"{PINK}{BOLD}--- View UGC Items (Total: {len(items)}) ---{END}"
-                    )
-                    if not item_to_view:
-                        break
-                    show_detail_view(item_to_view)
-                    
-        except KeyboardInterrupt:
-            print(f"\n{RED}Operation interrupted.{END}")
             try:
-                exit_choice = get_input("Exit the CLI? (y/n)", default="y").lower()
-                if exit_choice in ['y', 'yes', '']:
-                    print(f"{PINK}Goodbye! Keep shining! ✨{END}")
-                    break
-            except KeyboardInterrupt:
-                print(f"\n{PINK}Goodbye! Keep shining! ✨{END}")
-                break
+                if action == 'add':
+                    print(f"\n{PINK}{BOLD}--- Enter UGC Details ---{END}\n")
+                    productName = get_input("Product Name (or 'back' to cancel)", default="Petal Glow Lip Oil")
+                    
+                    while True:
+                        platform = get_input("Platform (instagram/youtube)", default="instagram").lower()
+                        if platform in ["instagram", "youtube"]:
+                            break
+                        print(f"{RED}Invalid platform. Choose from: instagram, youtube{END}")
+                        
+                    username = "sudarshona gogoi"
+                    userHandle = "@ugc_sudarshona"
+                    content = get_input("Review Content / Caption", required=True)
+                    
+                    mediaUrl = get_input("Media URL (relative path, e.g. /ugc/petal_glow_1.jpg, or empty)", default="")
+                    mediaType = "text"
+                    if mediaUrl:
+                        while True:
+                            mediaType = get_input("Media Type (image/video)", default="image").lower()
+                            if mediaType in ["image", "video"]:
+                                break
+                            print(f"{RED}Invalid media type. Choose 'image' or 'video'{END}")
+                            
+                    while True:
+                        try:
+                            rating = int(get_input("Rating (1-5)", default="5"))
+                            if 1 <= rating <= 5:
+                                break
+                            print(f"{RED}Rating must be between 1 and 5.{END}")
+                        except ValueError:
+                            print(f"{RED}Please enter a valid number.{END}")
+                            
+                    buyUrl = get_input("Direct Buy Product Link (e.g. https://example.com/buy)", required=True)
+                    
+                    # Multiple alternative links
+                    buyUrls = []
+                    add_multi = get_input("Would you like to add alternative purchase options (e.g. Amazon, Nykaa)? (y/n)", default="n").lower()
+                    if add_multi in ['y', 'yes']:
+                        while True:
+                            name = get_input("Alternative Store Name (e.g. Amazon, Nykaa, Sephora) [or empty to stop]")
+                            if not name:
+                                break
+                            url = get_input(f"Alternative Product Link for {name}", required=True)
+                            buyUrls.append({"name": name, "url": url})
+                            
+                            another = get_input("Add another alternative purchase option? (y/n)", default="n").lower()
+                            if another not in ['y', 'yes']:
+                                break
+                    
+                    default_post_url = "https://www.instagram.com/ugc_sudarshona" if platform == "instagram" else "https://youtube.com"
+                    postUrl = get_input("Instagram Post or YouTube Video Link", default=default_post_url)
+                    
+                    tags_input = get_input("Tags (comma-separated, e.g. makeup, lipoil)")
+                    tags = [t.strip().lower() for t in tags_input.split(",") if t.strip()]
+                    
+                    new_item = {
+                        "productName": productName,
+                        "platform": platform,
+                        "username": username,
+                        "userHandle": userHandle,
+                        "content": content,
+                        "mediaUrl": mediaUrl,
+                        "mediaType": mediaType,
+                        "rating": rating,
+                        "buyUrl": buyUrl,
+                        "buyUrls": buyUrls,
+                        "postUrl": postUrl,
+                        "tags": tags
+                    }
+                    
+                    print(f"\n{YELLOW}Saving item...{END}")
+                    insert_res = run_db_helper("insert", new_item)
+                    inserted_id = None
+                    if insert_res:
+                        for line in insert_res.splitlines():
+                            if line.startswith("db-inserted:"):
+                                inserted_id = line.split(":")[1].strip()
+                                break
+                    if inserted_id:
+                        print(f"{GREEN}✔ Successfully saved! ID: {inserted_id}{END}\n")
+                    else:
+                        print(f"{RED}Failed to insert item. Output: {insert_res}{END}")
+                        
+                elif action == 'edit':
+                    print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
+                    items = fetch_items()
+                    if not items:
+                        print(f"{RED}Failed to fetch items from database or no items exist.{END}\n")
+                        continue
+                        
+                    items_with_back = list(items) + [{"_id": "back"}]
+                    item_to_edit = fzf_select(
+                        items_with_back,
+                        format_item_for_list,
+                        prompt="Select UGC Item to Edit: "
+                    )
+                    if not item_to_edit or item_to_edit.get("_id") == "back":
+                        raise GoBackException()
+                        
+                    edit_ugc_item(item_to_edit)
+                    
+                elif action == 'delete':
+                    print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
+                    items = fetch_items()
+                    if not items:
+                        print(f"{RED}Failed to fetch items from database or no items exist.{END}\n")
+                        continue
+                        
+                    items_with_back = list(items) + [{"_id": "back"}]
+                    item_to_del = fzf_select(
+                        items_with_back,
+                        format_item_for_list,
+                        prompt="Select UGC Item to Delete: "
+                    )
+                    if not item_to_del or item_to_del.get("_id") == "back":
+                        raise GoBackException()
+                        
+                    confirm = get_input(f"Are you sure you want to delete {item_to_del.get('username')}'s review for '{item_to_del.get('productName')}'? (y/n)", default="n").strip().lower()
+                    if confirm in ['y', 'yes']:
+                        print(f"{YELLOW}Deleting item...{END}")
+                        del_res = run_db_helper("delete", target_id=item_to_del.get("_id"))
+                        deleted_count = None
+                        if del_res:
+                            for line in del_res.splitlines():
+                                if line.startswith("db-deleted:"):
+                                    deleted_count = line.split(":")[1].strip()
+                                    break
+                        if deleted_count and int(deleted_count) > 0:
+                            print(f"{GREEN}✔ Successfully deleted item from MongoDB Atlas! 🌸{END}\n")
+                        else:
+                            print(f"{RED}Failed to delete item. Output: {del_res}{END}\n")
+                    else:
+                        print(f"{PINK}Deletion cancelled! 💕{END}\n")
+                        
+                elif action == 'view':
+                    print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
+                    items = fetch_items()
+                    if not items:
+                        print(f"{RED}Failed to fetch items from database or no items exist.{END}\n")
+                        continue
+                        
+                    while True:
+                        items_with_back = list(items) + [{"_id": "back"}]
+                        item_to_view = fzf_select(
+                            items_with_back,
+                            format_item_for_list,
+                            prompt="Select UGC Item to View Details (Esc to go back): "
+                        )
+                        if not item_to_view or item_to_view.get("_id") == "back":
+                            raise GoBackException()
+                        show_detail_view(item_to_view)
+                        
+            except GoBackException:
+                print(f"\n{PINK}Operation cancelled. Going back to main menu...{END}\n")
+                continue
+                
+        except (KeyboardInterrupt, EOFError):
+            print(f"\n{PINK}Goodbye! Keep shining! ✨{END}")
+            break
 
 if __name__ == "__main__":
     main()
