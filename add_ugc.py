@@ -420,8 +420,7 @@ def main():
             choice_item = fzf_select(
                 main_menu_options,
                 lambda x: x["name"],
-                prompt="Select an action: ",
-                header=f"{PINK}{BOLD}--- Actions ---{END}"
+                prompt="Select an action: "
             )
             
             if not choice_item or choice_item["action"] == "exit":
