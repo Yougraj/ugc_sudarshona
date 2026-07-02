@@ -329,7 +329,6 @@ button, input, select {
   background: #ffffff;
   border: 2px solid #ffe5ec;
   border-radius: 24px;
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
@@ -350,6 +349,8 @@ button, input, select {
   overflow: hidden;
   background: #fff;
   border-bottom: 2px solid #ffe5ec;
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
 }
 
 .girly-card-img {
@@ -459,12 +460,24 @@ button, input, select {
 
 .girly-card-footer {
   display: flex;
-  gap: 8px;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
   border-top: 1px solid #ffe5ec;
   padding-top: 10px;
   margin-top: auto;
+  width: 100%;
+}
+
+.girly-card-footer .girly-shop-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (min-width: 600px) {
+  .girly-card-footer {
+    flex-direction: row;
+    gap: 8px;
+  }
 }
 
 .girly-likes {
