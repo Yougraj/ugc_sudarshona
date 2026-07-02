@@ -113,7 +113,8 @@ def fzf_select(items, format_fn, prompt="Search: ", header=None):
             elif not filtered:
                 lines.append(f"  {RED}No matching items found{END}")
                 
-            lines.append(f"\n{YELLOW}[Arrows: Navigate | Enter: Select | Esc: Back/Cancel]{END}")
+            lines.append("")
+            lines.append(f"{YELLOW}[Arrows: Navigate | Enter: Select | Esc: Back/Cancel]{END}")
             
             # Draw
             for line in lines:
