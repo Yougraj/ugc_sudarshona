@@ -52,7 +52,20 @@ def main():
         print(f"{RED}Oh no! 🌸 We couldn't connect to MongoDB Atlas. Check your database settings and internet!{END}")
         sys.exit(1)
     
-    db_count = int(count_res.split(":")[1])
+    db_count = 0
+    found = False
+    for line in count_res.splitlines():
+        if line.startswith("db:"):
+            try:
+                db_count = int(line.split(":")[1])
+                found = True
+                break
+            except ValueError:
+                pass
+    if not found:
+        print(f"{RED}Failed to parse database count from output: {count_res}{END}")
+        sys.exit(1)
+        
     print(f"{GREEN}✔ Successfully connected to MongoDB Atlas! ({db_count} items found) 🌟{END}\n")
 
     while True:
@@ -122,11 +135,16 @@ def main():
             
             print(f"\n{YELLOW}Saving item...{END}")
             insert_res = run_db_helper("insert", new_item)
-            if insert_res and ("inserted:" in insert_res):
-                inserted_id = insert_res.split(":")[1]
+            inserted_id = None
+            if insert_res:
+                for line in insert_res.splitlines():
+                    if line.startswith("db-inserted:"):
+                        inserted_id = line.split(":")[1].strip()
+                        break
+            if inserted_id:
                 print(f"{GREEN}✔ Successfully saved! ID: {inserted_id}{END}\n")
             else:
-                print(f"{RED}Failed to insert item.{END}")
+                print(f"{RED}Failed to insert item. Output: {insert_res}{END}")
             
         elif choice == '2':
             print(f"{YELLOW}Fetching items list from MongoDB Atlas...{END}")
@@ -135,11 +153,21 @@ def main():
                 print(f"{RED}Failed to fetch items from database.{END}\n")
                 continue
                 
-            try:
-                items = json.loads(list_res)
-            except Exception as e:
-                print(f"{RED}Failed to parse items JSON: {e}{END}\n")
-                continue
+            items = None
+            for line in list_res.splitlines():
+                line_str = line.strip()
+                if line_str.startswith("[") and line_str.endswith("]"):
+                    try:
+                        items = json.loads(line_str)
+                        break
+                    except Exception:
+                        pass
+            if items is None:
+                try:
+                    items = json.loads(list_res)
+                except Exception as e:
+                    print(f"{RED}Failed to parse items JSON: {e}{END}\n")
+                    continue
                 
             if not items:
                 print(f"{YELLOW}No items available to delete! 🌸{END}\n")
@@ -167,10 +195,16 @@ def main():
                     if confirm == 'y' or confirm == 'yes':
                         print(f"{YELLOW}Deleting item...{END}")
                         del_res = run_db_helper("delete", target_id)
-                        if del_res and ("deleted" in del_res):
+                        deleted_count = None
+                        if del_res:
+                            for line in del_res.splitlines():
+                                if line.startswith("db-deleted:"):
+                                    deleted_count = line.split(":")[1].strip()
+                                    break
+                        if deleted_count and int(deleted_count) > 0:
                             print(f"{GREEN}✔ Successfully deleted item from MongoDB Atlas! 🌸{END}\n")
                         else:
-                            print(f"{RED}Failed to delete item.{END}\n")
+                            print(f"{RED}Failed to delete item. Output: {del_res}{END}\n")
                     else:
                         print(f"{PINK}Deletion cancelled! 💕{END}\n")
                 else:
