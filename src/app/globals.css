@@ -280,9 +280,9 @@ button, input, select {
 
 /* UGC Feed Grid */
 .girly-feed {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
   padding: 0 16px 40px;
 }
 
