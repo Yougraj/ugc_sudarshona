@@ -53,12 +53,16 @@ async function main() {
       const result = await collection.insertOne(newItem);
       console.log(`db-inserted:${result.insertedId}`);
     } else if (action === 'delete') {
-      const targetId = args[1];
+      let targetId = args[1];
       if (!targetId) throw new Error("No ID provided");
+      // Strip leading and trailing quotes if present
+      if (targetId.startsWith('"') && targetId.endsWith('"')) {
+        targetId = targetId.slice(1, -1);
+      }
       let query = { _id: targetId };
       try {
-        if (targetId.length === 24) {
-          query = { _id: new ObjectId(targetId) };
+        if (ObjectId.isValid(targetId)) {
+          query = { _id: { $in: [targetId, new ObjectId(targetId)] } };
         }
       } catch (e) {}
       const result = await collection.deleteOne(query);

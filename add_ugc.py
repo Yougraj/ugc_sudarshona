@@ -33,8 +33,11 @@ def get_input(prompt, default=None, required=False):
 def run_db_helper(action, data=None):
     """Executes the db_helper.js Node script to interact with MongoDB"""
     cmd = ["node", "db_helper.js", action]
-    if data:
-        cmd.append(json.dumps(data))
+    if data is not None:
+        if isinstance(data, str):
+            cmd.append(data)
+        else:
+            cmd.append(json.dumps(data))
     
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
