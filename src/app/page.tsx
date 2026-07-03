@@ -1,72 +1,106 @@
 import clientPromise from '@/lib/mongodb';
-import UGCDashboard from '@/components/UGCDashboard';
+import Link from 'next/link';
 
-// Disable Static Rendering, force fetch on each load so changes are immediately visible
+// Force dynamic fetch so database statistics stay live
 export const dynamic = 'force-dynamic';
 
-export interface BuyLink {
-  name: string;
-  url: string;
+interface PortalStats {
+  beautyCount: number;
+  clothingCount: number;
 }
 
-export interface UGCItem {
-  _id: string;
-  productName: string;
-  platform: 'instagram' | 'youtube';
-  username: string;
-  userHandle: string;
-  content: string;
-  mediaUrl?: string;
-  mediaType: 'image' | 'video' | 'text';
-  rating?: number;
-  likes?: number;
-  buyUrl: string;
-  buyUrls?: BuyLink[];
-  postUrl?: string;
-  approved: boolean;
-  createdAt: string;
-  tags?: string[];
-}
-
-async function getUGCItems(): Promise<UGCItem[]> {
+async function getStats(): Promise<PortalStats> {
   try {
     const client = await clientPromise;
     const db = client.db('ugc_marketing');
-    const collection = db.collection('ugc_items');
     
-    const items = await collection.find({ approved: true }).sort({ createdAt: -1 }).toArray();
+    const beautyCount = await db.collection('ugc_items').countDocuments({ approved: true });
+    const clothingCount = await db.collection('clothing_items').countDocuments({ approved: true });
     
-    return items.map((item) => {
-      // Safely serialize MongoDB types to standard JS types
-      return {
-        _id: item._id.toString(),
-        productName: item.productName || '',
-        platform: item.platform || 'instagram',
-        username: item.username || '',
-        userHandle: item.userHandle || '',
-        content: item.content || '',
-        mediaUrl: item.mediaUrl || '',
-        mediaType: item.mediaType || 'text',
-        rating: typeof item.rating === 'number' ? item.rating : 5,
-        likes: typeof item.likes === 'number' ? item.likes : 0,
-        buyUrl: item.buyUrl || '',
-        buyUrls: Array.isArray(item.buyUrls) ? item.buyUrls : [],
-        postUrl: item.postUrl || '',
-        approved: !!item.approved,
-        createdAt: item.createdAt instanceof Date 
-          ? item.createdAt.toISOString() 
-          : (typeof item.createdAt === 'string' ? item.createdAt : new Date().toISOString()),
-        tags: Array.isArray(item.tags) ? item.tags : [],
-      } as UGCItem;
-    });
+    return { beautyCount, clothingCount };
   } catch (error) {
-    console.error('Failed to fetch UGC items from MongoDB Atlas:', error);
-    return [];
+    console.error('Failed to fetch stats:', error);
+    return { beautyCount: 0, clothingCount: 0 };
   }
 }
 
 export default async function Page() {
-  const initialItems = await getUGCItems();
-  return <UGCDashboard initialItems={initialItems} />;
-}
+  const { beautyCount, clothingCount } = await getStats();
 
+  return (
+    <div className="portal-container">
+      {/* Background drifting Ghibli-style watercolor clouds */}
+      <div className="ghibli-cloud cloud-1" />
+      <div className="ghibli-cloud cloud-2" />
+      <div className="ghibli-cloud cloud-3" />
+
+      {/* Bottom grassy meadow backdrop */}
+      <div className="grassy-meadow" />
+
+      {/* Cozy Storybook Badge */}
+      <div className="vibe-tag">
+        🌤️ Sudarshona's Corner 🌤️
+      </div>
+
+      {/* Header */}
+      <header className="portal-header">
+        <h1 className="portal-title">Sudarshona's UGC Hub</h1>
+        <p className="portal-subtitle">
+          No filters, just warm sunlit reviews, aesthetic outfits, and botanical skincare. Take a stroll and explore our cozy workshops.
+        </p>
+      </header>
+
+      {/* Cards Grid */}
+      <div className="cards-grid">
+        {/* Beauty Card (The Skincare Meadow) */}
+        <Link 
+          href="/beauty" 
+          className="portal-card beauty-card"
+        >
+          <span className="card-icon">🍃</span>
+          <h2 className="card-title">Skincare Meadow</h2>
+          <p className="card-desc">
+            Gentle lip glow oils that shine like morning dew, hydrating rice water cleansers, and organic skincare reviews. Feel the fresh summer breeze.
+          </p>
+          <div className="card-stats">
+            <span>🌸</span>
+            <span>{beautyCount} botanical reviews</span>
+          </div>
+          <div className="card-arrow">
+            <span>Explore space</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </div>
+        </Link>
+
+        {/* Clothing Card (The Outfit Closet) */}
+        <Link 
+          href="/clothing" 
+          className="portal-card clothing-card"
+        >
+          <span className="card-icon">🧥</span>
+          <h2 className="card-title">The Outfit Closet</h2>
+          <p className="card-desc">
+            Cozy hand-knit cardigans, lightweight breathable linen blazers, and aesthetic unisex fit checks. Curated lookbooks in warm earthy tones.
+          </p>
+          <div className="card-stats">
+            <span>🍂</span>
+            <span>{clothingCount} style guides</span>
+          </div>
+          <div className="card-arrow">
+            <span>Explore space</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </div>
+        </Link>
+      </div>
+
+      {/* Footer */}
+      <footer className="portal-footer">
+        ugc_sudarshona • crafted with love & nostalgia
+      </footer>
+    </div>
+  );
+}

@@ -1,0 +1,710 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+
+.clothing-theme {
+/* Whimsical Ghibli-Styled Mobile-First CSS Design System - Trend & Tailor */
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+& {
+  --bg-main: #edf4ef; /* Light sage-meadow wash */
+  --bg-phone: #fcfbf7; /* Botanical leaf cream parchment */
+  --bg-surface: #f3f8f4; /* Creamy matcha green tea paper */
+  --bg-surface-hover: #cbdcd0;
+  
+  --border-color: #cbdcd0; /* Cozy sage border */
+  --border-hover: #9bbba3;
+  
+  --text-primary: #233b28; /* Deep forest oak green */
+  --text-secondary: #425a47;
+  --text-muted: #788f7d;
+
+  /* Accent Colors */
+  --accent-pink: #4b8358; /* Deep leaf green */
+  --accent-rose-gold: #aed3b6; /* Light grass green */
+  --accent-soft: #e2ede5; /* Pale minty moss */
+  --accent-sparkle: #cbdcd0;
+  
+  /* Platform Accent Overlays */
+  --color-instagram: linear-gradient(135deg, #aed3b6, #4b8358);
+  --color-tiktok: #1b3020;
+  --color-twitter: #233b28;
+  --color-linkedin: #233b28;
+  --color-youtube: #4b8358;
+  --color-web: #cbdcd0;
+
+  --font-sans: 'Fredoka', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Lora', Georgia, serif; /* Storybook display font */
+  
+  --shadow-sm: 0 4px 12px rgba(35, 59, 40, 0.04);
+  --shadow-md: 0 8px 24px rgba(35, 59, 40, 0.07);
+  --shadow-lg: 0 16px 40px rgba(35, 59, 40, 0.12);
+  --shadow-gold: 0 0 15px rgba(174, 211, 182, 0.3);
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+& {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+  line-height: 1.5;
+  /* Minimalist organic abstract shapes - Ghibli Sky & Leaf */
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(123, 198, 118, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(116, 192, 252, 0.12) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+/* Mobile-Locked Screen Container - Responsive Canvas */
+.phone-frame {
+  width: 100%;
+  max-width: 480px; /* Default for mobile screens */
+  min-height: 100vh;
+  background-color: var(--bg-phone);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  transition: max-width 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .phone-frame {
+    max-width: 720px;
+    margin: 30px auto;
+    border-radius: 30px;
+    min-height: calc(100vh - 60px);
+    box-shadow: 0 15px 50px rgba(171, 122, 94, 0.12);
+    border: 1.5px solid var(--border-color);
+  }
+}
+
+@media (min-width: 1024px) {
+  .phone-frame {
+    max-width: 1100px;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button, input, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Girly Custom Scrollbar inside phone frame */
+.phone-frame::-webkit-scrollbar {
+  width: 6px;
+}
+.phone-frame::-webkit-scrollbar-track {
+  background: var(--bg-phone);
+}
+.phone-frame::-webkit-scrollbar-thumb {
+  background: var(--accent-soft);
+  border-radius: 99px;
+}
+.phone-frame::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-pink);
+}
+
+/* Header */
+.girly-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--border-color);
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.girly-logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-pink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Hero Section */
+.girly-hero {
+  padding: 24px 20px 20px;
+  text-align: center;
+  position: relative;
+  background: linear-gradient(180deg, var(--accent-soft) 0%, #ffffff 100%);
+}
+
+.sparkles-container {
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.girly-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent-pink);
+  line-height: 1.2;
+  margin-bottom: 8px;
+  text-shadow: 1px 1px 0px #fff, 2px 2px 0px var(--border-color);
+}
+
+.girly-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding: 0 10px;
+}
+
+/* Stats Ribbon */
+.girly-stats-ribbon {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 6px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.girly-stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.girly-stat-value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--accent-pink);
+  font-weight: 700;
+}
+
+.girly-stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Controls */
+.girly-controls {
+  padding: 0 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.girly-search {
+  position: relative;
+}
+
+.girly-search-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-color);
+  border-radius: 99px;
+  padding: 10px 16px 10px 40px;
+  font-size: 13px;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.girly-search-input:focus {
+  border-color: var(--accent-pink);
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 117, 143, 0.15);
+}
+
+.girly-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-pink);
+  font-size: 14px;
+}
+
+.girly-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.girly-filters::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for clean app experience */
+}
+
+.girly-filter-btn {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.girly-filter-btn:hover {
+  background: var(--bg-surface-hover);
+}
+
+.girly-filter-btn.active {
+  background: var(--accent-pink);
+  border-color: var(--accent-pink);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.girly-sort-select {
+  background: #ffffff;
+  border: 1.5px solid var(--border-color);
+  border-radius: 99px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* UGC Feed Grid - Responsive */
+.girly-feed {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 12px 40px;
+}
+
+@media (min-width: 600px) {
+  .girly-feed {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 0 16px 40px;
+  }
+}
+
+@media (min-width: 900px) {
+  .girly-feed {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 0 24px 40px;
+  }
+}
+
+.girly-card {
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.girly-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(171, 122, 94, 0.12), 0 0 15px rgba(204, 163, 116, 0.2);
+  border-color: var(--accent-pink);
+}
+
+.girly-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1; /* standard instagram aspect ratio */
+  overflow: hidden;
+  background: #fff;
+  border-bottom: 2px solid var(--border-color);
+  border-top-left-radius: 22px;
+  border-top-right-radius: 22px;
+}
+
+.girly-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.girly-platform-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.girly-platform-badge.instagram { background: var(--color-instagram); }
+.girly-platform-badge.tiktok { background: var(--color-tiktok); }
+.girly-platform-badge.twitter { background: var(--color-twitter); }
+.girly-platform-badge.youtube { background: var(--color-youtube); }
+.girly-platform-badge.web { background: var(--accent-soft); color: var(--accent-pink); border: 1.5px solid var(--accent-pink); }
+
+.girly-card-& {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.girly-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.girly-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-rose-gold), var(--accent-pink));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgba(171, 122, 94, 0.15);
+}
+
+.girly-username {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.girly-handle {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.girly-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.girly-star-icon {
+  color: #ffb703;
+  width: 14px;
+  height: 14px;
+}
+
+.girly-card-text {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.girly-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.girly-tag {
+  font-size: 10px;
+  background: var(--bg-surface);
+  color: var(--accent-pink);
+  border: 1px solid var(--border-color);
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+.girly-card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 10px;
+  margin-top: auto;
+  width: 100%;
+}
+
+.girly-card-footer .girly-shop-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (min-width: 600px) {
+  .girly-card-footer {
+    flex-direction: row;
+    gap: 8px;
+  }
+}
+
+.girly-likes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--accent-pink);
+  font-weight: 600;
+}
+
+/* Shop / Buy Button */
+.girly-shop-btn {
+  background: linear-gradient(135deg, var(--accent-rose-gold) 0%, var(--accent-pink) 100%);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(171, 122, 94, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.girly-shop-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(171, 122, 94, 0.25);
+  animation: sparkle-glow 0.8s ease-in-out infinite alternate;
+}
+
+/* Modals */
+.girly-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(43, 41, 39, 0.4); /* warm neutral shadow tint */
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.girly-modal-content {
+  background: #ffffff;
+  border: 3px solid var(--border-color);
+  border-radius: 28px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+  animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.girly-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--accent-pink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  font-weight: bold;
+}
+
+.girly-modal-media {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1/1;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.girly-modal-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.girly-modal-details {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+
+@keyframes popUp {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sparkle-glow {
+  0% { box-shadow: 0 4px 10px rgba(171, 122, 94, 0.2); }
+  100% { box-shadow: 0 6px 20px rgba(171, 122, 94, 0.35), 0 0 10px rgba(204, 163, 116, 0.3); }
+}
+
+/* Sparkle Floating Hearts */
+.girly-decor {
+  pointer-events: none;
+  position: absolute;
+  font-size: 16px;
+  opacity: 0.6;
+  animation: float-up 4s ease-in-out infinite;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+  50% { opacity: 0.8; }
+  100% { transform: translateY(-100px) scale(1.1); opacity: 0; }
+}
+
+/* Footer */
+.girly-footer {
+  margin-top: auto;
+  padding: 24px 20px;
+  text-align: center;
+  border-top: 2px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+
+/* Responsive Desktop Modal Layout */
+@media (min-width: 768px) {
+  .girly-modal-content {
+    max-width: 850px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    max-height: 85vh;
+    overflow: hidden;
+  }
+  
+  .girly-modal-media {
+    border-right: 2px solid var(--border-color);
+    border-bottom: none !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
+  }
+  
+  .girly-modal-details {
+    padding: 24px;
+    height: 100%;
+    overflow-y: auto;
+  }
+}
+
+/* Card Hover Micro-Animations */
+.girly-card-hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(171, 122, 94, 0.25); /* Translucent tan overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+  border-radius: 22px;
+}
+
+.girly-card-hover-icon {
+  font-size: 32px;
+  transform: scale(0.5);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.girly-card:hover .girly-card-hover-overlay {
+  opacity: 1;
+}
+
+.girly-card:hover .girly-card-hover-icon {
+  transform: scale(1.1);
+  animation: float 2s ease-in-out infinite;
+}
+
+.girly-card:hover .girly-card-img {
+  transform: scale(1.06);
+}
+
+}

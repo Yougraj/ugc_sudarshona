@@ -1,7 +1,29 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { UGCItem } from "@/app/page";
+export interface BuyLink {
+  name: string;
+  url: string;
+}
+
+export interface UGCItem {
+  _id: string;
+  productName: string;
+  platform: 'instagram' | 'youtube';
+  username: string;
+  userHandle: string;
+  content: string;
+  mediaUrl?: string;
+  mediaType: 'image' | 'video' | 'text';
+  rating?: number;
+  likes?: number;
+  buyUrl: string;
+  buyUrls?: BuyLink[];
+  postUrl?: string;
+  approved: boolean;
+  createdAt: string;
+  tags?: string[];
+}
 
 interface UGCDashboardProps {
   initialItems: UGCItem[];
@@ -56,15 +78,10 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
     return { total, avgRating };
   }, [initialItems]);
 
-  // Filtered and Sorted Items (Restricted to Instagram and YouTube)
+  // Filtered and Sorted Items (Support all platforms from MongoDB)
   const filteredAndSortedItems = useMemo(() => {
     return initialItems
       .filter((item) => {
-        // Only keep instagram and youtube
-        if (item.platform !== "instagram" && item.platform !== "youtube") {
-          return false;
-        }
-
         // Search Filter
         const matchesSearch =
           item.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -133,6 +150,10 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
           <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.525 3.545 12 3.545 12 3.545s-7.525 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.022 0 12 0 12s0 3.978.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.862.508 9.388.508 9.388.508s7.525 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.978 24 12 24 12s0-3.978-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
         </svg>
       );
+    } else if (platform === "tiktok") {
+      return <span style={{ marginRight: "2px" }}>🎵</span>;
+    } else if (platform === "web") {
+      return <span style={{ marginRight: "2px" }}>🌐</span>;
     }
     return null;
   };
@@ -313,7 +334,7 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
           />
         </div>
 
-        {/* Platform Filters - Restricted to Instagram and YouTube */}
+        {/* Platform Filters */}
         <div className="girly-filters">
           {["all", "instagram", "youtube"].map((plat) => (
             <button
