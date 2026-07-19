@@ -9,7 +9,7 @@ export interface BuyLink {
 export interface UGCItem {
   _id: string;
   productName: string;
-  platform: 'instagram' | 'youtube';
+  platform: 'instagram' | 'youtube' | 'both';
   username: string;
   userHandle: string;
   content: string;
@@ -20,6 +20,8 @@ export interface UGCItem {
   buyUrl: string;
   buyUrls?: BuyLink[];
   postUrl?: string;
+  instagramPostUrl?: string;
+  youtubePostUrl?: string;
   approved: boolean;
   createdAt: string;
   tags?: string[];
@@ -94,7 +96,10 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
 
         // Platform Filter
         const matchesPlatform =
-          platformFilter === "all" || item.platform === platformFilter;
+          platformFilter === "all" ||
+          item.platform === platformFilter ||
+          (platformFilter === "instagram" && item.platform === "both") ||
+          (platformFilter === "youtube" && item.platform === "both");
 
         return matchesSearch && matchesPlatform;
       })
@@ -149,6 +154,17 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
         <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
           <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.525 3.545 12 3.545 12 3.545s-7.525 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.022 0 12 0 12s0 3.978.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.862.508 9.388.508 9.388.508s7.525 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.978 24 12 24 12s0-3.978-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
         </svg>
+      );
+    } else if (platform === "both") {
+      return (
+        <span style={{ display: "inline-flex", gap: "3px", alignItems: "center" }}>
+          <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+          </svg>
+          <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.525 3.545 12 3.545 12 3.545s-7.525 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.022 0 12 0 12s0 3.978.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.862.508 9.388.508 9.388.508s7.525 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.978 24 12 24 12s0-3.978-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+          </svg>
+        </span>
       );
     } else if (platform === "tiktok") {
       return <span style={{ marginRight: "2px" }}>🎵</span>;
@@ -335,13 +351,13 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
 
         {/* Platform Filters */}
         <div className="girly-filters">
-          {["all", "instagram", "youtube"].map((plat) => (
+          {["all", "instagram", "youtube", "both"].map((plat) => (
             <button
               key={plat}
               className={`girly-filter-btn ${platformFilter === plat ? "active" : ""}`}
               onClick={() => setPlatformFilter(plat)}
             >
-              {plat.charAt(0).toUpperCase() + plat.slice(1)}
+              {plat === "both" ? "Both" : plat.charAt(0).toUpperCase() + plat.slice(1)}
             </button>
           ))}
         </div>
@@ -396,7 +412,7 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                     <span className="girly-card-hover-icon">✨</span>
                   </div>
                   <span className={`girly-platform-badge ${item.platform}`}>
-                    {getPlatformIcon(item.platform)} {item.platform}
+                    {getPlatformIcon(item.platform)} {item.platform === "both" ? "both" : item.platform}
                   </span>
                 </div>
               ) : (
@@ -418,7 +434,7 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                   }}
                 >
                   <span className={`girly-platform-badge ${item.platform}`}>
-                    {getPlatformIcon(item.platform)} {item.platform}
+                    {getPlatformIcon(item.platform)} {item.platform === "both" ? "both" : item.platform}
                   </span>
                   <div style={{ fontSize: "36px", marginBottom: "8px" }}>🧥</div>
                   <strong style={{ fontSize: "13px" }}>{item.productName}</strong>
@@ -500,7 +516,7 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                   style={{ position: "static" }}
                 >
                   {getPlatformIcon(selectedItem.platform)}{" "}
-                  {selectedItem.platform}
+                  {selectedItem.platform === "both" ? "both" : selectedItem.platform}
                 </span>
                 <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                   Product: <strong>{selectedItem.productName}</strong>
@@ -581,25 +597,83 @@ export default function UGCDashboard({ initialItems }: UGCDashboardProps) {
                 </span>
 
                 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {selectedItem.postUrl && (
-                    <a
-                      href={selectedItem.postUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="girly-shop-btn"
-                      style={{
-                        background: "none",
-                        border: "1.5px solid var(--accent-pink)",
-                        color: "var(--accent-pink)",
-                        boxShadow: "none",
-                        padding: "8px 16px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {selectedItem.platform === "instagram"
-                        ? "Review on Instagram 📸💕"
-                        : "Review on YouTube 🎥✨"}
-                    </a>
+                  {selectedItem.platform === "both" ? (
+                    <>
+                      {(selectedItem.instagramPostUrl || selectedItem.postUrl) && (
+                        <a
+                          href={selectedItem.instagramPostUrl || selectedItem.postUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="girly-shop-btn"
+                          style={{
+                            background: "none",
+                            border: "1.5px solid var(--accent-pink)",
+                            color: "var(--accent-pink)",
+                            boxShadow: "none",
+                            padding: "8px 16px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Review on Instagram 📸💕
+                        </a>
+                      )}
+                      {selectedItem.youtubePostUrl && (
+                        <a
+                          href={selectedItem.youtubePostUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="girly-shop-btn"
+                          style={{
+                            background: "none",
+                            border: "1.5px solid var(--accent-pink)",
+                            color: "var(--accent-pink)",
+                            boxShadow: "none",
+                            padding: "8px 16px",
+                            fontSize: "12px",
+                          }}
+                        >
+                          Review on YouTube 🎥✨
+                        </a>
+                      )}
+                    </>
+                  ) : selectedItem.platform === "youtube" ? (
+                    (selectedItem.youtubePostUrl || selectedItem.postUrl) && (
+                      <a
+                        href={selectedItem.youtubePostUrl || selectedItem.postUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="girly-shop-btn"
+                        style={{
+                          background: "none",
+                          border: "1.5px solid var(--accent-pink)",
+                          color: "var(--accent-pink)",
+                          boxShadow: "none",
+                          padding: "8px 16px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        Review on YouTube 🎥✨
+                      </a>
+                    )
+                  ) : (
+                    (selectedItem.instagramPostUrl || selectedItem.postUrl) && (
+                      <a
+                        href={selectedItem.instagramPostUrl || selectedItem.postUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="girly-shop-btn"
+                        style={{
+                          background: "none",
+                          border: "1.5px solid var(--accent-pink)",
+                          color: "var(--accent-pink)",
+                          boxShadow: "none",
+                          padding: "8px 16px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        Review on Instagram 📸💕
+                      </a>
+                    )
                   )}
                   {selectedItem.buyUrls && selectedItem.buyUrls.length > 0 ? (
                     selectedItem.buyUrls.map((link, idx) => (

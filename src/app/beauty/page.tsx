@@ -27,6 +27,8 @@ async function getUGCItems(): Promise<UGCItem[]> {
         buyUrl: item.buyUrl || '',
         buyUrls: Array.isArray(item.buyUrls) ? item.buyUrls : [],
         postUrl: item.postUrl || '',
+        instagramPostUrl: item.instagramPostUrl || '',
+        youtubePostUrl: item.youtubePostUrl || '',
         approved: !!item.approved,
         createdAt: item.createdAt instanceof Date 
           ? item.createdAt.toISOString() 

@@ -381,6 +381,7 @@ button, input, select {
 .girly-platform-badge.tiktok { background: var(--color-tiktok); }
 .girly-platform-badge.twitter { background: var(--color-twitter); }
 .girly-platform-badge.youtube { background: var(--color-youtube); }
+.girly-platform-badge.both { background: linear-gradient(135deg, #4b8358, #aed3b6); }
 .girly-platform-badge.web { background: var(--accent-soft); color: var(--accent-pink); border: 1.5px solid var(--accent-pink); }
 
 .girly-card-& {
